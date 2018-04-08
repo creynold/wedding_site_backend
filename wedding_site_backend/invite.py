@@ -17,6 +17,10 @@ class InviteResource(object):
         session = Session()
 
         invite = session.query(Invite).get(pass_code)
+        if invite is None:
+            response.status = falcon.HTTP_404
+            return
+
         response_json = {
             'first_name': invite.first_name,
             'last_name': invite.last_name,
