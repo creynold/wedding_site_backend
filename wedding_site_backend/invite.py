@@ -10,8 +10,7 @@ class InviteResource(object):
             response.status = falcon.HTTP_400
             return
 
-        request_json = json.loads(request.body)
-        pass_code = request_json.get('pass_code')
+        pass_code = request.get_param('pass_code')
 
         if pass_code is None:
             response.status = falcon.HTTP_400
