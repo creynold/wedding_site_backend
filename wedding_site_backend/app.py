@@ -1,8 +1,8 @@
 import falcon
 
-from .invite import Invite
+from .invite import InviteResource
 
 api = application = falcon.API()
 
-invites = Invite()
+invites = InviteResource()
 api.add_route('/invites', invites)

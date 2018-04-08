@@ -1,4 +1,6 @@
-from sqlalchemy import Column, String, ForeignKey, Integer
+import configparser
+from sqlalchemy import Column, String, ForeignKey, Integer, create_engine
+from sqlalchemy.engine.url import URL
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -29,3 +31,11 @@ class Song(base):
     artist = Column(String)
     image_url = Column(String)
     requestors = relationship('Invite', secondary=song_requests)
+
+def get_engine():
+  config = configparser.ConfigParser(allow_no_value=True)
+  config.read('wedding_site_backend/config.ini')
+
+  return create_engine(
+      URL(config['database']['database_dialect'], **config['database_url']),
+      echo=True)

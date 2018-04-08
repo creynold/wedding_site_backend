@@ -1,15 +1,4 @@
-import configparser
-from sqlalchemy import create_engine
-from sqlalchemy.engine.url import URL
 from wedding_site_backend import database
-
-def get_engine():
-  config = configparser.ConfigParser(allow_no_value=True)
-  config.read('wedding_site_backend/config.ini')
-
-  return create_engine(
-      URL(config['database']['database_dialect'], **config['database_url']),
-      echo=True)
 
 if __name__ == '__main__':
   import argparse
@@ -20,4 +9,4 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   if args.operation == 'create':
-    database.base.metadata.create_all(get_engine())
+    database.base.metadata.create_all(database.get_engine())
