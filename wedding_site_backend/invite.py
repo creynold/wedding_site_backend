@@ -6,10 +6,6 @@ from .database import Invite, get_engine
 class InviteResource(object):
 
     def on_get(self, request, response):
-        if request.content_type != falcon.MEDIA_JSON:
-            response.status = falcon.HTTP_400
-            return
-
         pass_code = request.get_param('pass_code')
 
         if pass_code is None:
