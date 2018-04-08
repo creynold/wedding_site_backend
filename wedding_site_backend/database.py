@@ -7,7 +7,7 @@ base = declarative_base()
 
 song_requests = Table(
     'song_requests', base.metadata,
-    Column('invite_id', String, ForeignKey('invite.email')),
+    Column('invite_id', String, ForeignKey('invite.pass_code')),
     Column('song_id', Integer, ForeignKey('song.id'))
 )
 
