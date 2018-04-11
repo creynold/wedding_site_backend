@@ -46,8 +46,22 @@ class InviteResource(object):
             response.status = falcon.HTTP_404
             return
 
-        if 'first_name' in request_json:
-            invite.first_name = request_json['first_name']
+        first_name = request_json.get('first_name')
+        last_name = request_json.get('last_name')
+        email = request_json.get('email')
+        try:
+            num_attending = int(request_json.get('num_attending'))
+        except:
+            num_attending = None
+
+        if first_name is None or last_name is None or email is None:
+            response.status = falcon.HTTP_400
+            return
+
+        invite.first_name = first_name
+        invite.last_name = last_name
+        invite.email = email
+        invite.num_attending = num_attending
 
         session.commit()
 
