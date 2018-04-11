@@ -1,4 +1,5 @@
-from wedding_site_backend import database
+from wedding_site_backend.database import get_engine, base
+from wedding_site_backend.config import Config
 
 if __name__ == '__main__':
   import argparse
@@ -8,5 +9,6 @@ if __name__ == '__main__':
                       choices=['create'])
   args = parser.parse_args()
 
+  config = Config()
   if args.operation == 'create':
-    database.base.metadata.create_all(database.get_engine())
+    base.metadata.create_all(get_engine(config))

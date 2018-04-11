@@ -4,6 +4,7 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.session import sessionmaker
 
 base = declarative_base()
 
@@ -32,10 +33,13 @@ class Song(base):
     image_url = Column(String)
     requestors = relationship('Invite', secondary=song_requests)
 
-def get_engine():
-  config = configparser.ConfigParser(allow_no_value=True)
-  config.read('wedding_site_backend/config.ini')
-
+def get_engine(config):
   return create_engine(
-      URL(config['database']['database_dialect'], **config['database_url']),
+      URL(config.get('database', 'database_dialect'),
+          **config.get_group('database_url')),
       echo=True)
+
+def start_session(config):
+    engine = get_engine(config)
+    Session = sessionmaker(engine)
+    return Session()

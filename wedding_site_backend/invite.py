@@ -1,14 +1,11 @@
 import falcon
 import json
-from sqlalchemy.orm.session import sessionmaker
-from .database import Invite, get_engine
-
-def start_session():
-    engine = get_engine()
-    Session = sessionmaker(engine)
-    return Session()
+from .database import Invite, start_session
 
 class InviteResource(object):
+
+    def __init__(self, config):
+        self.config = config
 
     def on_get(self, request, response):
         pass_code = request.get_param('pass_code')
@@ -17,7 +14,7 @@ class InviteResource(object):
             response.status = falcon.HTTP_400
             return
 
-        session = start_session()
+        session = start_session(self.config)
 
         invite = session.query(Invite).get(pass_code)
         if invite is None:
@@ -42,7 +39,7 @@ class InviteResource(object):
             response.status = falcon.HTTP_400
             return
 
-        session = start_session()
+        session = start_session(self.config)
 
         invite = session.query(Invite).get(pass_code)
         if invite is None:
