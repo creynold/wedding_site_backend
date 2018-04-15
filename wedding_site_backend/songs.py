@@ -7,7 +7,33 @@ class SongResource(object):
     def __init__(self, config):
         self.config = config
 
-    # track, artist, image_url, requestors
+    def on_get(self, request, response):
+        pass_code = request.get_param('pass_code')
+
+        if pass_code is None:
+            response.status = falcon.HTTP_400
+            return
+
+        session = start_session(self.config)
+
+        invite = session.query(Invite).get(pass_code)
+        if invite is None:
+            response.status = falcon.HTTP_404
+            return
+
+        response_json = {
+            'num_song_requests': len(invite.song_requests),
+            'tracks': [{
+                'track': song.track,
+                'artist': song.artist,
+                'image_url': song.image_url,
+                'song_id': song.id
+            } for song in invite.song_requests]
+        }
+
+        response.body = json.dumps(response_json)
+        response.content_type = falcon.MEDIA_JSON
+
     def on_post(self, request, response):
         request_json = request.media
         pass_code = request_json.get('pass_code')
@@ -55,4 +81,35 @@ class SongResource(object):
             'image_url': song.image_url,
             'song_id': song.id
         })
+        response.content_type = falcon.MEDIA_JSON
+
+    def on_delete(self, request, response):
+        request_json = request.media
+        pass_code = request_json.get('pass_code')
+        song_id = request_json.get('song_id')
+        if pass_code is None or song_id is None:
+            response.status = falcon.HTTP_400
+            return
+
+        session = start_session(self.config)
+
+        invite = session.query(Invite).get(pass_code)
+        if invite is None:
+            response.status = falcon.HTTP_404
+            return
+
+        response_json = {}
+        for song in invite.song_requests[:]:
+            if song.id == song_id:
+                invite.song_requests.remove(song)
+                response_json = {
+                  'track': song.track,
+                  'artist': song.artist,
+                  'image_url': song.image_url,
+                  'song_id': song.id
+                }
+
+        session.commit()
+
+        response.body = json.dumps(response_json)
         response.content_type = falcon.MEDIA_JSON

@@ -7,7 +7,7 @@ class LastFm(object):
 
   _last_fm_url = 'http://ws.audioscrobbler.com/2.0/'
   _format = 'json'
-  _limit = '30'
+  _limit = '5'
 
   def __init__(self, config, method='track.search', track=None, artist=None, page=0):
       self.api_key = config.get('last_fm', 'api_key')
@@ -23,6 +23,7 @@ class LastFm(object):
           'method': self.method,
           'track': self.track,
           'artist': self.artist,
+          'limit': self._limit,
           'page': self.page
       }).json()['results']
 
@@ -38,9 +39,9 @@ class TrackSearch(object):
 
     def _format_track(track):
         return {
-            'title': track['name'],
+            'track': track['name'],
             'artist': track['artist'],
-            'image': track['image'][2]['#text']
+            'image_url': track['image'][2]['#text']
         }
 
     def on_get(self, request, response):
