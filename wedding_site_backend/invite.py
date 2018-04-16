@@ -27,8 +27,7 @@ class InviteResource(object):
             num_attending = None
 
         if first_name is None or last_name is None or email is None:
-            response.status = falcon.HTTP_400
-            return
+            raise falcon.HTTPBadRequest()
 
         invite.first_name = first_name
         invite.last_name = last_name

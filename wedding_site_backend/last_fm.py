@@ -67,8 +67,7 @@ class TrackSearch(object):
     def on_get(self, request, response):
         track = request.get_param('track')
         if track is None:
-            response.status = falcon.HTTP_400
-            return
+            raise falcon.HTTPBadRequest()
 
         last_fm = LastFm(self.config, track=track, artist=request.get_param('artist'))
         last_fm.search()

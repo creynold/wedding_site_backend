@@ -1,6 +1,5 @@
 import falcon
-import json
-from .database import Invite, Song, start_session
+from .database import Song
 
 class SongResource(object):
 
@@ -25,9 +24,7 @@ class SongResource(object):
         session = request.session
 
         if len(invite.song_requests) >= 5:
-            response.status = falcon.HTTP_403
-            response.body = json.dumps({'message': 'Too many songs added'})
-            return
+            raise falcon.HTTPForbidden('Too many songs added')
 
         track = request_json.get('track')
         artist = request_json.get('artist')
@@ -35,9 +32,7 @@ class SongResource(object):
         album = request_json.get('album')
 
         if track is None or artist is None or image_url is None:
-            response.status = falcon.HTTP_400
-            response.body = json.dumps({'message': 'missing parameters'})
-            return
+            raise falcon.HTTPBadRequest('Missing parameters')
 
         existing_songs = session.query(Song).filter_by(track=track, artist=artist).all()
         if len(existing_songs) > 0:
@@ -76,5 +71,7 @@ class SongResource(object):
                   'image_url': song.image_url,
                   'song_id': song.id
                 }
+                session.commit()
+                return
 
-        session.commit()
+        raise falcon.HTTPNotFound()
