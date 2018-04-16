@@ -30,6 +30,7 @@ class Song(base):
     id = Column(Integer, primary_key=True)
     track = Column(String)
     artist = Column(String)
+    album = Column(String)
     image_url = Column(String)
     requestors = relationship('Invite', secondary=song_requests)
 

@@ -1,7 +1,5 @@
 import falcon
-import json
 import requests
-from .database import Invite, start_session
 
 class LastFm(object):
 
@@ -9,18 +7,18 @@ class LastFm(object):
   _format = 'json'
   _limit = '5'
 
-  def __init__(self, config, method='track.search', track=None, artist=None, page=0):
+  def __init__(self, config, track=None, artist=None, page=0):
       self.api_key = config.get('last_fm', 'api_key')
-      self.method = method
       self.track = track
       self.artist = artist
       self.page = page
 
   def search(self):
+      method = 'track.search'
       result = requests.get(self._last_fm_url, {
           'format': self._format,
           'api_key': self.api_key,
-          'method': self.method,
+          'method': method,
           'track': self.track,
           'artist': self.artist,
           'limit': self._limit,
@@ -32,32 +30,41 @@ class LastFm(object):
       self.start_index = int(result['opensearch:startIndex'])
       self.tracks = result['trackmatches']['track']
 
+  def get_info(self, artist):
+      method = 'track.getInfo'
+      result = requests.get(self._last_fm_url, {
+          'format': self._format,
+          'api_key': self.api_key,
+          'method': method,
+          'track': self.track,
+          'artist': artist
+      }).json()
+
+      return {
+          'album': result['track']['album']['title'],
+          'image_url': result['track']['album']['image'][2]['#text']
+      } if 'track' in result and 'album' in result['track'] else None
+
+
 class TrackSearch(object):
 
     def __init__(self, config):
         self.config = config
 
-    def _format_track(track):
+    def _format_track(track, last_fm):
+        album_data = last_fm.get_info(track['artist'])
         return {
+            'track': track['name'],
+            'artist': track['artist'],
+            'album': album_data['album'],
+            'image_url': album_data['image_url']
+        } if album_data is not None else {
             'track': track['name'],
             'artist': track['artist'],
             'image_url': track['image'][2]['#text']
         }
 
     def on_get(self, request, response):
-        pass_code = request.get_param('pass_code')
-
-        if pass_code is None:
-            response.status = falcon.HTTP_400
-            return
-
-        session = start_session(self.config)
-
-        invite = session.query(Invite).get(pass_code)
-        if invite is None:
-            response.status = falcon.HTTP_403
-            return
-
         track = request.get_param('track')
         if track is None:
             response.status = falcon.HTTP_400
@@ -66,7 +73,6 @@ class TrackSearch(object):
         last_fm = LastFm(self.config, track=track, artist=request.get_param('artist'))
         last_fm.search()
 
-        tracks = [TrackSearch._format_track(track) for track in last_fm.tracks]
+        tracks = [TrackSearch._format_track(track, last_fm) for track in last_fm.tracks]
 
-        response.body = json.dumps({'tracks': tracks})
-        response.content_type = falcon.MEDIA_JSON
+        response.response_json = {'tracks': tracks}
