@@ -18,7 +18,7 @@ class CheckPassCode(object):
 
         session = start_session(self.config)
 
-        invite = session.query(Invite).get(pass_code)
+        invite = session.query(Invite).get(pass_code.strip())
         if invite is None:
             raise falcon.HTTPForbidden()
 
