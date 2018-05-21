@@ -20,7 +20,7 @@ class CheckPassCode(object):
 
         invite = session.query(Invite).get(pass_code.lower().strip())
         if invite is None:
-            raise falcon.HTTPForbidden()
+            raise falcon.HTTPForbidden('Passphrase not recognized!')
 
         request.invite = invite
         request.session = session
