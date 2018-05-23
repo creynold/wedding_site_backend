@@ -3,3 +3,5 @@ config.ini
 *.swp
 __pycache__
 test.db
+passphrases.csv
+*.pyc

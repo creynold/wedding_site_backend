@@ -1,3 +1,4 @@
+import csv
 from wedding_site_backend.database import get_engine, base, Invite, start_session
 from wedding_site_backend.config import Config
 
@@ -16,7 +17,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('operation', help='operation to perform on database',
-                        choices=['create', 'add_invite'])
+                        choices=['create', 'add_invite', 'add_from_file'])
+    parser.add_argument('filename', help='Passphrase CSV file', nargs='?')
     parser.add_argument('passcodes', help='Pass codes for the invites', nargs='*')
     args = parser.parse_args()
 
@@ -28,3 +30,10 @@ if __name__ == '__main__':
         for passcode in args.passcodes:
             add_invite(passcode, session)
         session.commit()
+    elif args.operation == 'add_from_file':
+        session = start_session(config)
+        with open(args.filename, 'rb') as f:
+            reader = csv.reader(f)
+            for passcode in reader:
+                add_invite(passcode[0], session)
+            session.commit()
