@@ -8,6 +8,11 @@ class CheckPassCode(object):
         self.config = config
 
     def process_request(self, request, response):
+        request.session = start_session(self.config)
+
+        if request.path == '/responses':
+            return
+
         if request.method == 'GET':
             pass_code = request.get_param('pass_code')
         else:
@@ -16,15 +21,13 @@ class CheckPassCode(object):
         if pass_code is None:
             raise falcon.HTTPUnauthorized('Pass code required')
 
-        session = start_session(self.config)
-
-        invite = session.query(Invite).get(pass_code.lower().strip())
+        invite = request.session.query(Invite).get(pass_code.lower().strip())
         if invite is None:
             raise falcon.HTTPForbidden('Passphrase not recognized!')
 
         request.invite = invite
-        request.session = session
 
     def process_response(self, request, response, resource, req_succeeded):
-        response.body = json.dumps(response.response_json)
-        response.content_type = falcon.MEDIA_JSON
+        if hasattr(response, 'response_json'):
+            response.body = json.dumps(response.response_json)
+            response.content_type = falcon.MEDIA_JSON

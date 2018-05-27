@@ -1,4 +1,3 @@
-import configparser
 from sqlalchemy import Column, String, ForeignKey, Integer, create_engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.schema import Table
