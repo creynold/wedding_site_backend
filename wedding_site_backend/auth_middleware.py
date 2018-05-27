@@ -31,3 +31,7 @@ class CheckPassCode(object):
         if hasattr(response, 'response_json'):
             response.body = json.dumps(response.response_json)
             response.content_type = falcon.MEDIA_JSON
+        try:
+            request.session.close()
+        except:
+            print("Error closing session")
