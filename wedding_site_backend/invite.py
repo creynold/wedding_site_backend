@@ -1,6 +1,7 @@
 import falcon
+from .resources import BaseResource
 
-class InviteResource(object):
+class InviteResource(BaseResource):
 
     def on_get(self, request, response):
         invite = request.invite
@@ -14,7 +15,6 @@ class InviteResource(object):
         }
 
     def on_put(self, request, response):
-        session = request.session
         invite = request.invite
         request_json = request.media
 
@@ -34,7 +34,7 @@ class InviteResource(object):
         invite.email = email
         invite.num_attending = num_attending
 
-        session.commit()
+        invite.save(self.db.session)
 
         response.response_json = {
             'first_name': invite.first_name,

@@ -1,7 +1,8 @@
 import falcon
 from .database import Song
+from .resources import BaseResource
 
-class SongResource(object):
+class SongResource(BaseResource):
 
     def on_get(self, request, response):
         invite = request.invite
@@ -31,7 +32,7 @@ class SongResource(object):
         if track is None or artist is None or image_url is None:
             raise falcon.HTTPBadRequest('Missing parameters')
 
-        existing_songs = session.query(Song).filter_by(track=track, artist=artist).all()
+        existing_songs = Song.find_songs(track, artist, self.db.session)
         if len(existing_songs) > 0:
             song = existing_songs[0]
             if invite not in song.requestors:
@@ -40,9 +41,7 @@ class SongResource(object):
             song = Song(track=track, artist=artist, album=album, image_url=image_url)
             song.requestors.append(invite)
 
-            session.add(song)
-
-        session.commit()
+            song.save(self.db.session)
 
         response.response_json = {
             'track': song.track,
@@ -54,7 +53,6 @@ class SongResource(object):
 
     def on_delete(self, request, response):
         invite = request.invite
-        session = request.session
         song_id = request.media.get('song_id')
 
         response.response_json = {}
@@ -68,7 +66,7 @@ class SongResource(object):
                   'image_url': song.image_url,
                   'song_id': song.id
                 }
-                session.commit()
+                invite.save(self.db.session)
                 return
 
         raise falcon.HTTPNotFound()

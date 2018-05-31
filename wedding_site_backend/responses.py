@@ -3,14 +3,15 @@ from .database import Invite, Song
 
 class Responses(object):
 
-    def __init__(self, config):
+    def __init__(self, config, dbmanager):
         self.config = config
+        self.dbmanager = dbmanager
 
     def on_get(self, request, response):
         if request.get_param('password') != self.config.get('misc', 'responses_password'):
             raise falcon.HTTPForbidden()
 
-        invites = request.session.query(Invite).all()
+        invites = Invite.get_all(self.dbmanager.session)
 
         response.response_json = {
             'rsvps': [self.__convert_invite(invite)
@@ -18,7 +19,7 @@ class Responses(object):
                       if invite.first_name],
         }
 
-        songs = request.session.query(Song).all()
+        songs = Song.get_all(self.dbmanager.session)
         response.response_json['songs'] = [self.__convert_song(song)
                                            for song in songs
                                            if len(song.requestors) > 0]

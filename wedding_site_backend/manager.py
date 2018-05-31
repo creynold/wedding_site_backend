@@ -21,9 +21,3 @@ class DBManager(object):
     @property
     def session(self):
         return self.DBSession()
-
-    def setup(self):
-        try:
-            models.SAModel.metadata.create_all(self.engine)
-        except Exception as e:
-            print('Could not initialize DB: {}'.format(e))

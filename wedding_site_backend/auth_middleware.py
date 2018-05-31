@@ -1,15 +1,13 @@
 import falcon
 import json
-from .database import Invite, start_session
+from .database import Invite
 
 class CheckPassCode(object):
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, dbmanager):
+        self.dbmanager = dbmanager
 
     def process_request(self, request, response):
-        request.session = start_session(self.config)
-
         if request.path == '/responses':
             return
 
@@ -19,12 +17,10 @@ class CheckPassCode(object):
             pass_code = request.media.get('pass_code')
 
         if pass_code is None:
-            request.session.close()
             raise falcon.HTTPUnauthorized('Pass code required')
 
-        invite = request.session.query(Invite).get(pass_code.lower().strip())
+        invite = Invite.get(pass_code, self.dbmanager.session)
         if invite is None:
-            request.session.close()
             raise falcon.HTTPForbidden('Passphrase not recognized!')
 
         request.invite = invite
@@ -33,7 +29,3 @@ class CheckPassCode(object):
         if hasattr(response, 'response_json'):
             response.body = json.dumps(response.response_json)
             response.content_type = falcon.MEDIA_JSON
-        try:
-            request.session.close()
-        except:
-            print("Error closing session")

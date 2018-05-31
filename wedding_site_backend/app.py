@@ -8,12 +8,14 @@ from .responses import Responses
 from .auth_middleware import CheckPassCode
 
 config = Config()
-api = application = falcon.API(middleware=[CheckPassCode(config)])
+dbmanager = DBManager(config)
 
-invites = InviteResource()
-songs = SongResource()
+api = application = falcon.API(middleware=[CheckPassCode(dbmanager)])
+
+invites = InviteResource(dbmanager)
+songs = SongResource(dbmanager)
 track_search = TrackSearch(config)
-responses = Responses(config)
+responses = Responses(config, dbmanager)
 api.add_route('/invites', invites)
 api.add_route('/songs', songs)
 api.add_route('/search', track_search)
