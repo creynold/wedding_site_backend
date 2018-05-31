@@ -22,7 +22,6 @@ class SongResource(BaseResource):
         request_json = request.media
 
         invite = request.invite
-        session = request.session
 
         track = request_json.get('track')
         artist = request_json.get('artist')
@@ -53,7 +52,10 @@ class SongResource(BaseResource):
 
     def on_delete(self, request, response):
         invite = request.invite
-        song_id = request.media.get('song_id')
+        try:
+            song_id = int(request.media.get('song_id'))
+        except:
+            raise falcon.HTTPBadRequest
 
         response.response_json = {}
         for song in invite.song_requests[:]:
@@ -68,5 +70,7 @@ class SongResource(BaseResource):
                 }
                 invite.save(self.db.session)
                 return
+            else:
+                print("SONG ID DONT MATCH", song.id, song_id)
 
         raise falcon.HTTPNotFound()

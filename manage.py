@@ -1,16 +1,14 @@
 import csv
-from wedding_site_backend.database import get_engine, base, Invite, start_session
+from wedding_site_backend.database import Invite
 from wedding_site_backend.config import Config
+from wedding_site_backend.manager import DBManager
 
 def get_config():
     return Config()
 
-def create_table(config):
-    base.metadata.create_all(get_engine(config))
-
 def add_invite(passcode, session):
     new_invite = Invite(pass_code=passcode)
-    session.add(new_invite)
+    new_invite.save(session)
 
 if __name__ == '__main__':
     import argparse
@@ -23,17 +21,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     config = get_config()
+    dbmanager = DBManager(config)
     if args.operation == 'create':
-        create_table(config)
+        dbmanager.create_database()
     elif args.operation == 'add_invite':
-        session = start_session(config)
         for passcode in args.passcodes:
-            add_invite(passcode, session)
-        session.commit()
+            add_invite(passcode, dbmanager.session)
     elif args.operation == 'add_from_file':
-        session = start_session(config)
         with open(args.filename, 'r') as f:
             reader = csv.reader(f)
             for passcode in reader:
-                add_invite(passcode[0], session)
-            session.commit()
+                add_invite(passcode[0], dbmanager.session)

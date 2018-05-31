@@ -1,5 +1,4 @@
 from sqlalchemy import Column, String, ForeignKey, Integer, create_engine
-from sqlalchemy.engine.url import URL
 from sqlalchemy.schema import Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -24,13 +23,13 @@ class Invite(BaseModel):
     song_requests = relationship('Song', secondary=song_requests)
 
     @classmethod
-    def get(pass_code, session):
+    def get(cls, pass_code, session):
         with session.begin():
             invite = session.query(Invite).get(pass_code.lower().strip())
         return invite
 
     @classmethod
-    def get_all(session):
+    def get_all(cls, session):
         invites = []
         with session.begin():
           invites = session.query(Invite).all()
@@ -51,14 +50,14 @@ class Song(BaseModel):
     requestors = relationship('Invite', secondary=song_requests)
 
     @classmethod
-    def get_all(session):
+    def get_all(cls, session):
         songs = []
         with session.begin():
             songs = session.query(Song).all()
         return songs
 
     @classmethod
-    def find_songs(track, artist, session):
+    def find_songs(cls, track, artist, session):
         found_songs = []
         with session.begin():
             found_songs = session.query(Song).filter_by(track=track, artist=artist).all()

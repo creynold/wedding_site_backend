@@ -6,6 +6,7 @@ from .config import Config
 from .last_fm import TrackSearch
 from .responses import Responses
 from .auth_middleware import CheckPassCode
+from .manager import DBManager
 
 config = Config()
 dbmanager = DBManager(config)
