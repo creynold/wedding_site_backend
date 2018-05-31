@@ -32,7 +32,7 @@ if __name__ == '__main__':
         session.commit()
     elif args.operation == 'add_from_file':
         session = start_session(config)
-        with open(args.filename, 'rb') as f:
+        with open(args.filename, 'r') as f:
             reader = csv.reader(f)
             for passcode in reader:
                 add_invite(passcode[0], session)

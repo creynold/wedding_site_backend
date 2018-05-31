@@ -23,9 +23,6 @@ class SongResource(object):
         invite = request.invite
         session = request.session
 
-        if len(invite.song_requests) >= 10:
-            raise falcon.HTTPForbidden('Too many songs added')
-
         track = request_json.get('track')
         artist = request_json.get('artist')
         image_url = request_json.get('image_url')

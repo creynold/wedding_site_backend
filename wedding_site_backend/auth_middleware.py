@@ -19,10 +19,12 @@ class CheckPassCode(object):
             pass_code = request.media.get('pass_code')
 
         if pass_code is None:
+            request.session.close()
             raise falcon.HTTPUnauthorized('Pass code required')
 
         invite = request.session.query(Invite).get(pass_code.lower().strip())
         if invite is None:
+            request.session.close()
             raise falcon.HTTPForbidden('Passphrase not recognized!')
 
         request.invite = invite
